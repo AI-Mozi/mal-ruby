@@ -1,26 +1,25 @@
-require_relative "mal_readline"
-
-# read
-def READ(str)
-    return str
+#TODO: https://github.com/kanaka/mal/blob/master/process/guide.md#optional
+def READ(val)
+  val
 end
 
-# eval
-def EVAL(ast, env)
-    return ast
+def EVAL(val)
+  val
 end
 
-# print
-def PRINT(exp)
-    return exp
+def PRINT(val)
+  print(val)
 end
 
-# repl
-def REP(str)
-    return PRINT(EVAL(READ(str), {}))
+def rep(input)
+  PRINT(EVAL(READ(input)))
 end
 
-# repl loop
-while line = _readline("user> ")
-    puts REP(line)
+def prompt(*args)
+  print(*args)
+  gets
+end
+
+while input = prompt("user> ")
+    rep(input)
 end
