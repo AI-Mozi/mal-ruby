@@ -11,36 +11,35 @@ class Reader
   end
 
   def peek
-    @token[@position]
+    @tokens[@position]
   end
 end
 
-def read_str
-  tokens = tokenize
-  @reader = Reader.new(tokens)
+def read_str(string)
+  tokens = tokenize(string)
+  reader = Reader.new(tokens)
+  read_from(reader)
 end
 
 def tokenize(string)
   arr = string.scan(REGEXP)
 end
 
-def read_from
-  token = @reader.peek
+def read_from(instance)
+  token = instance.peek
   first = token[0]
 
   if first == "("
-    read_list(token)
+    read_list(instance)
   else
     read_atom(token)
   end
 end
 
 def read_list(token)
-  token.each do |w|
-    read_from unless w == ")"
-  end
+  read_from(token) unless token == ")"
 end
 
 def read_atom(token)
-
+  token
 end

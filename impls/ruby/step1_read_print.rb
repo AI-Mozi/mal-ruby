@@ -1,6 +1,7 @@
 #TODO: https://github.com/kanaka/mal/blob/master/process/guide.md#optional
+require_relative "./reader"
 def READ(val)
-  val
+  read_str(val)
 end
 
 def EVAL(val)
