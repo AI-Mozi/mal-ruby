@@ -9,7 +9,7 @@ def EVAL(val)
 end
 
 def PRINT(val)
-  print(val)
+  puts(val)
 end
 
 def rep(input)

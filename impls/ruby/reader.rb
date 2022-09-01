@@ -18,28 +18,26 @@ end
 def read_str(string)
   tokens = tokenize(string)
   reader = Reader.new(tokens)
-  read_from(reader)
+  read_form(reader)
 end
 
 def tokenize(string)
-  arr = string.scan(REGEXP)
+  string.scan(REGEXP).map{|e| e[0]}.select{ |t| t != "" && t[0..0] != ";" }
 end
 
-def read_from(instance)
-  token = instance.peek
-  first = token[0]
-
-  if first == "("
-    read_list(instance)
+def read_form(reader)
+  token = reader.peek
+  case token[0]
+  when "("
+    read_list(reader)
   else
-    read_atom(token)
+    read_atom(reader)
   end
 end
 
-def read_list(token)
-  read_from(token) unless token == ")"
+def read_list(obj)
 end
 
-def read_atom(token)
-  token
+def read_atom(reader)
+  tokens = reader.peek
 end
