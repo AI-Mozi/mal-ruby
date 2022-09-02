@@ -1,10 +1,8 @@
-def pr_str(mal_type)
-  switch mal_type
-  case
-
-  case
-
-  case
-  
+def pr_str(val)
+  case val.class
+  when Array
+    val.each { pr_str(_1) }
+  else
+    val.to_s
   end
 end

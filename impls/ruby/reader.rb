@@ -6,8 +6,8 @@ class Reader
   end
 
   def next
-    peek
     @position += 1
+    @tokens[@position - 1]
   end
 
   def peek
@@ -35,9 +35,25 @@ def read_form(reader)
   end
 end
 
-def read_list(obj)
+def read_list(reader)
+  token = reader.next
+  puts "t: #{reader.peek}"
+  while reader.peek != ")"
+    read_form(reader)
+  end
 end
 
 def read_atom(reader)
-  tokens = reader.peek
+  token = reader.next
+  case token
+    when /^-?[0-9]+$/ then       token.to_i
+    when /^-?[0-9][0-9.]*$/ then token.to_
+    when /^"(?:\\.|[^\\"])*"$/ then parse_str(token)
+    when /^"/ then               raise "expected '\"', got EOF"
+    when /^:/ then               "\u029e" + token[1..-1]
+    when "nil" then              nil
+    when "true" then             true
+    when "false" then            false
+    else                         token.to_sym
+  end
 end

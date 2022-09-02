@@ -1,5 +1,7 @@
 #TODO: https://github.com/kanaka/mal/blob/master/process/guide.md#optional
-require_relative "./reader"
+require_relative "reader"
+require_relative "printer"
+
 def READ(val)
   read_str(val)
 end
@@ -9,10 +11,10 @@ def EVAL(val)
 end
 
 def PRINT(val)
-  puts(val)
+  pr_str(val)
 end
 
-def rep(input)
+def REP(input)
   PRINT(EVAL(READ(input)))
 end
 
@@ -22,5 +24,5 @@ def prompt(*args)
 end
 
 while input = prompt("user> ")
-    rep(input)
+  REP(input)
 end
