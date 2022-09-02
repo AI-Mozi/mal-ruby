@@ -24,5 +24,5 @@ def prompt(*args)
 end
 
 while input = prompt("user> ")
-  REP(input)
+  puts REP(input)
 end

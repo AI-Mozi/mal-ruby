@@ -48,7 +48,7 @@ def read_atom(reader)
   case token
     when /^-?[0-9]+$/ then       token.to_i
     when /^-?[0-9][0-9.]*$/ then token.to_
-    when /^"(?:\\.|[^\\"])*"$/ then parse_str(token)
+    when /^"(?:\\.|[^\\"])*"$/ then token.to_s
     when /^"/ then               raise "expected '\"', got EOF"
     when /^:/ then               "\u029e" + token[1..-1]
     when "nil" then              nil
