@@ -1,4 +1,4 @@
-REGEXP = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/
+REGEX = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/
 class Reader
   def initialize(tokens)
     @tokens = tokens
@@ -17,30 +17,38 @@ end
 
 def read_str(string)
   tokens = tokenize(string)
+  return nil if tokens.size == 0
   reader = Reader.new(tokens)
   read_form(reader)
 end
 
 def tokenize(string)
-  string.scan(REGEXP).map{|e| e[0]}.select{ |t| t != "" && t[0..0] != ";" }
+  string.scan(REGEX).map{|e| e[0]}.select{ |t| t != "" && t[0..0] != ";" }
 end
 
 def read_form(reader)
   token = reader.peek
-  case token[0]
+  case token
   when "("
     read_list(reader)
+  when ")"
+    raise "unexpeted ')"
   else
     read_atom(reader)
   end
 end
 
 def read_list(reader)
+  ast = []
   token = reader.next
-  puts "t: #{reader.peek}"
-  while reader.peek != ")"
-    read_form(reader)
+  while (token = reader.peek) != ")"
+    if !token
+      raise "expected ')', got EOF"
+    end
+    ast << read_form(reader)
   end
+  reader.next
+  ast
 end
 
 def read_atom(reader)
@@ -54,6 +62,6 @@ def read_atom(reader)
     when "nil" then              nil
     when "true" then             true
     when "false" then            false
-    else                         token.to_sym
+    else                         token
   end
 end
