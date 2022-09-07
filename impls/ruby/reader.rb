@@ -1,3 +1,5 @@
+require_relative "types"
+
 REGEX = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/
 class Reader
   def initialize(tokens)
@@ -30,25 +32,32 @@ def read_form(reader)
   token = reader.peek
   case token
   when "("
-    read_list(reader)
-  when ")"
-    raise "unexpeted ')"
+    read_list(reader, List, "(", ")")
+  when "{"
+    Hash[read_list(reader, List, "{", "}").each_slice(2).to_a]
+  when "["
+    read_list(reader, Vector, "[", "]")
+  when ")", "]", "}"
+    raise "unexpeted closing bracker [)', ']' or '}']"
   else
     read_atom(reader)
   end
 end
 
-def read_list(reader)
-  ast = []
+def read_list(reader, klass, first, last)
+  result = klass.new
   token = reader.next
-  while (token = reader.peek) != ")"
+
+  raise "Wrong start" if token != first
+  while (token = reader.peek) != last
     if !token
       raise "expected ')', got EOF"
     end
-    ast << read_form(reader)
+    result.push(read_form(reader))
   end
+
   reader.next
-  ast
+  result
 end
 
 def read_atom(reader)
@@ -58,7 +67,7 @@ def read_atom(reader)
     when /^-?[0-9][0-9.]*$/ then token.to_
     when /^"(?:\\.|[^\\"])*"$/ then token.to_s
     when /^"/ then               raise "expected '\"', got EOF"
-    when /^:/ then               "\u029e" + token[1..-1]
+    when /^:/ then               ":" + token[1..-1]
     when "nil" then              nil
     when "true" then             true
     when "false" then            false
