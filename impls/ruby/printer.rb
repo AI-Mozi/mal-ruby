@@ -5,12 +5,12 @@ def pr_str(val)
 
   case 
   when klass == List
-    "(" + val.join(" ") + ")"
+    "(" + val.map { |v| pr_str(v) }.join(" ") + ")"
   when klass == Vector
-    "[" + val.join(" ") + "]"
+    "[" + val.map { |v| pr_str(v) }.join(" ") + "]"
   when klass == Hash
     key_val = []
-    val.each { |k,v| key_val.push(k).push(v) }
+    val.each { |k,v| key_val.push(pr_str(k)).push(pr_str(v)) }
     "{" + key_val.join(" ") + "}"
   when klass == NilClass
     "nil"
