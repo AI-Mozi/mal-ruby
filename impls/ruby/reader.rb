@@ -55,7 +55,7 @@ def read_list(reader, klass, first, last)
   result = klass.new
   token = reader.next
 
-  raise "Wrong start" if token != first
+  raise "Expected: #{first} got: #{token}" if token != first
   while (token = reader.peek) != last
     if !token
       raise "expected ')', got EOF"
