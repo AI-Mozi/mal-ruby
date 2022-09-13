@@ -1,9 +1,12 @@
 class Env
   attr_accessor :data
 
-  def initialize(outer)
+  def initialize(outer, binds = [], expres = [])
     @outer = outer
     @data = {}
+    binds.each_with_index do |e, i|
+      set(e, expres[i])
+    end
   end
 
   def set(key, val)
@@ -23,7 +26,7 @@ class Env
 
   def get(key)
     val = find(key)
-    raise "#{key} not found" unless val
+    raise "'#{key}' not found" unless val
 
     val.data[key]
   end
