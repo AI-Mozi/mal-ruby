@@ -29,6 +29,10 @@ def tokenize(string)
   string.scan(REGEX).map { |e| e[0] }.select { |t| t != '' && t[0..0] != ';' }
 end
 
+def parse_str(token)
+  return token[1..-2].gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'})
+end
+
 def read_form(reader)
   token = reader.peek
   case token
@@ -72,9 +76,9 @@ def read_atom(reader)
   case token
   when /^-?[0-9]+$/ then       token.to_i
   when /^-?[0-9][0-9.]*$/ then token.to_
-  when /^"(?:\\.|[^\\"])*"$/ then token.to_s
+  when /^"(?:\\.|[^\\"])*"$/ then parse_str(token)
   when /^"/ then               raise "expected '\"', got EOF"
-  when /^:/ then               ":#{token[1..]}"
+  when /^:/ then               "':#{token[1..]}'"
   when 'nil' then              nil
   when 'true' then             true
   when 'false' then            false
