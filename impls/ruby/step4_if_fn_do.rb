@@ -26,8 +26,7 @@ def EVAL(val, env)
       end
       return EVAL(val[2], new_env)
     when :do
-      el = eval_ast(val.drop(1), env)
-      return el.map { |e| EVAL(e, env) }.last
+      return eval_ast(List.new(val[1..]), env)[-1]
     when :if
       cond = EVAL(val[1], env)
       if cond
