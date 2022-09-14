@@ -27,10 +27,9 @@ def EVAL(val, env)
       return EVAL(val[2], new_env)
     when :do
       el = eval_ast(val.drop(1), env)
-      return el.last
+      return el.map { |e| EVAL(e, env) }.last
     when :if
       cond = EVAL(val[1], env)
-
       if cond
         return EVAL(val[2], env)
       else
@@ -63,6 +62,10 @@ def rep(input)
   PRINT(EVAL(READ(input), @env))
 end
 
+def not_rep(input)
+  EVAL(READ(input), @env)
+end
+
 def prompt(*args)
   print(*args)
   gets
@@ -82,6 +85,8 @@ def eval_ast(ast, env)
     ast
   end
 end
+
+rep('(def! not (fn* (a) (if a false true)))')
 
 while input = prompt('user> ')
   begin
