@@ -1,7 +1,7 @@
 require_relative "types"
 
 def pr_str(val, print_readably = true)
-  j = print_readably ? ' ' : ''
+  j = print_readably
   case val
   when List
     "(#{val.map { |v| pr_str(v, j) }.join(' ')})"

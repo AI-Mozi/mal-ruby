@@ -4,8 +4,13 @@ class Env
   def initialize(outer, binds = [], expres = [])
     @outer = outer
     @data = {}
-    binds.each_with_index do |e, i|
-      set(e, expres[i])
+    binds.each_index do |i|
+      if binds[i] == :'&'
+        set(binds[i + 1], List.new(expres.drop(i)))
+        break
+      else
+        set(binds[i], expres[i])
+      end
     end
   end
 
@@ -15,7 +20,7 @@ class Env
   end
 
   def find(key)
-    if @data[key]
+    if @data.key?(key)
       return self
     elsif @outer
       return @outer.find(key)

@@ -6,7 +6,7 @@ $ns = {
   'pr-str': ->(*args) { args.map { |x| pr_str(x, true) }.join(' ') },
   'str': ->(*args) { args.map { |x| pr_str(x, false) }.join('') },
   'prn': ->(*args) { puts(args.map { |x| pr_str(x, true) }.join(' ')) },
-  'println': ->(*args) { puts(args.map { |x| pr_str(x, false) }.join('')) },
+  'println': ->(*args) { puts(args.map { |x| pr_str(x, false) }.join(' ')) },
   'list': ->(*args) { List.new(args) },
   'list?': ->(a) { a.instance_of? List },
   'empty?': ->(a) { a.empty? },
