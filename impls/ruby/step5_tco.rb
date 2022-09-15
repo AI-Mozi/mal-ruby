@@ -21,7 +21,11 @@ def EVAL(val, env)
     when :def!
       return env.set(val[1], EVAL(val[2], env))
     when :"let*"
-      env = Env.new(@env)
+      new_env = Env.new(@env)
+      val[1].each_slice(2) do |f, s|
+        new_env.set(f, EVAL(s, new_env))
+      end
+      env = new_env
       val = val[2]
     when :do
       val = eval_ast(List.new(val[1..]), env)[-1]
@@ -35,12 +39,10 @@ def EVAL(val, env)
     else
       ev = eval_ast(val, env)
       f = ev[0]
-      if f.instance_of? Function
-        val = f.ast
-        env = Env.new(env, f.params, ev.drop(1))
-      else
-        return f.call(*ev.drop(1))
-      end
+      return f.call(*ev.drop(1)) unless f.instance_of? Function
+
+      val = f.ast
+      env = Env.new(env, f.params, ev.drop(1))
     end
   end
 end
