@@ -23,6 +23,8 @@ def pr_str(val, print_readably = true)
     else
       val
     end
+  when Atom
+    "(atom #{pr_str(val.val, true)})"
   else
     val.to_s
   end

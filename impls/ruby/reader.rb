@@ -38,11 +38,11 @@ def read_form(reader)
   case token
   when '@'
     reader.next
-    List.new(['deref', read_form(reader)])
+    List.new([:deref, read_form(reader)])
   when '^'
     reader.next
     m = read_form(reader)
-    List.new(['with-meta', read_form(reader), m])
+    List.new([:"with-meta", read_form(reader), m])
   when '('
     read_list(reader, List, '(', ')')
   when '{'
