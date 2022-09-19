@@ -2,12 +2,13 @@ class List < Array; end
 class Vector < Array; end
 
 class Function < Proc
-  attr_accessor :ast, :params, :env, :fn
+  attr_accessor :ast, :params, :env, :fn, :is_macro
 
-  def initialize(ast, params, env, &blk)
+  def initialize(ast, params, env, is_macro = false, &blk)
     @ast = ast
     @params = params
     @env = env
+    @is_macro = is_macro
   end
 end
 

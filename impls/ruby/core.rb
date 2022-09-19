@@ -31,5 +31,9 @@ $ns = {
   'swap!': ->(*a) { a[0].val = a[1].call(*[a[0].val].concat(a[2..])) },
 
   'cons': ->(a, b) { List.new(b.clone.unshift(a)) },
-  'concat': ->(*a) { List.new(a&.reduce(:+) || []) }
+  'concat': ->(*a) { List.new(a&.reduce(:+) || []) },
+
+  'nth': ->(a, b) { raise "index out of range" if b >= a.size; a[b] },
+  'first': ->(a) { a.nil? ? nil : a[0] },
+  'rest': ->(a) { List.new(a.nil? || a.empty? ? [] : a[1..]) }
 }
