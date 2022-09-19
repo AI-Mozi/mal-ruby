@@ -43,6 +43,18 @@ def read_form(reader)
     reader.next
     m = read_form(reader)
     List.new([:"with-meta", read_form(reader), m])
+  when "'"
+    reader.next
+    List.new([:quote, read_form(reader)])
+  when '~'
+    reader.next
+    List.new([:unquote, read_form(reader)])
+  when '`'
+    reader.next
+    List.new([:quasiquote, read_form(reader)])
+  when '~@'
+    reader.next
+    List.new([:"splice-unquote", read_form(reader)])
   when '('
     read_list(reader, List, '(', ')')
   when '{'
