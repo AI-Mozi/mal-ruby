@@ -17,7 +17,7 @@ def pr_str(val, print_readably = true)
     'nil'
   when String
     if val[0] == ':'
-      ":#{obj[1..]}"
+      ':' + val[1..]
     elsif j
       val.inspect
     else

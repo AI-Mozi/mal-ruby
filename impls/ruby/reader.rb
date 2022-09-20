@@ -90,7 +90,7 @@ def read_atom(reader)
   when /^-?[0-9][0-9.]*$/ then token.to_
   when /^"(?:\\.|[^\\"])*"$/ then parse_str(token)
   when /^"/ then               raise "expected '\"', got EOF"
-  when /^:/ then               "':#{token[1..]}'"
+  when /^:/ then               ':' + token[1..]
   when 'nil' then              nil
   when 'true' then             true
   when 'false' then            false
