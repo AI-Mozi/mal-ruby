@@ -19,3 +19,10 @@ class Atom
     @val = val
   end
 end
+
+class MalException < StandardError
+  attr_accessor :data
+  def initialize(data)
+    @data = data
+  end
+end

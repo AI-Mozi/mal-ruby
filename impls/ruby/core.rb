@@ -35,5 +35,27 @@ $ns = {
 
   'nth': ->(a, b) { raise "index out of range" if b >= a.size; a[b] },
   'first': ->(a) { a.nil? ? nil : a[0] },
-  'rest': ->(a) { List.new(a.nil? || a.empty? ? [] : a[1..]) }
+  'rest': ->(a) { List.new(a.nil? || a.empty? ? [] : a[1..]) },
+  'nil?': ->(a) { a.nil? },
+  'true?': ->(a) { a == true },
+  'false?': ->(a) { a == false },
+  'symbol?': ->(a) { a.instance_of? Symbol },
+  'symbol': ->(a) { a.to_sym },
+  'keyword': ->(a) { a[0] == ':' ? a : ":#{a}" },
+  'keyword?': ->(a) { print a.class },
+  'vector': ->(*a) { Vector.new([*a]) },
+  'vector?': ->(a) { a.instance_of? Vector },
+  'sequential?': ->(a) { a.instance_of?(List) || a.instance_of?(Vector) },
+  'hash-map': ->(*a) { Hash[*a.each_slice(2) { |k, v| [k, v] }] }, # cos zjebane
+  'map?': ->(a) { a.instance_of? Hash },
+  'keys': ->(a) { List.new(a.keys) },
+  'vals': ->(a) { List.new(a.values) },
+  'contains?': ->(a, b) { a.key?(b) },
+  'get': ->(a, b) { a.nil? ? nil : a[b] },
+  'dissoc': ->(a, *b) { a.reject { |k, _| b.include?(k) } },
+  'assoc': ->(a, *b) { a.merge(Hash[b.each_slice(2).to_a]) },
+
+  'throw': ->(a) { raise MalException.new(a), a },
+  'apply': ->(*a) { a[0].call(*a[1..-2].concat(a[-1])) },
+  'map': ->(a, b) { List.new(b.map { a.call(_1) }) }
 }
