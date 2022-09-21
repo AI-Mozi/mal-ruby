@@ -1,4 +1,5 @@
 require_relative 'env'
+require "readline"
 
 $ns = {
   'pr-str': ->(*a) { a.map { |x| pr_str(x, true) }.join(' ') },
@@ -57,5 +58,16 @@ $ns = {
 
   'throw': ->(a) { raise MalException.new(a), a },
   'apply': ->(*a) { a[0].call(*a[1..-2].concat(a[-1])) },
-  'map': ->(a, b) { List.new(b.map { a.call(_1) }) }
+  'map': ->(a, b) { List.new(b.map { a.call(_1) }) },
+
+  'readline': ->(a) { Readline.readline(a, true) },
+  'string?': ->(a) { a.is_a?(String) && a[0] != ':' },
+  'number?': ->(a) { a.is_a? Numeric },
+  'macro?': ->(a) { (a.is_a? Function) && a.is_macro },
+  'fn?': ->(a) { (a.is_a? Proc) && (!(a.is_a? Function) || !a.is_macro) },
+  'seq': ->(a) { a.nil? ? nil : a.empty? ? nil : a.seq },
+  'conj': ->(*a) { a[0].clone.conj(a[1..]) },
+  'time-ms': -> { (Time.now.to_f * 1000).to_i },
+  'meta': ->(a) { a.meta },
+  'with-meta': ->(a, b) { t = a.clone; t.meta = b; t }
 }
