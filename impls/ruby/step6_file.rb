@@ -6,7 +6,7 @@ require_relative 'env'
 require_relative 'core'
 
 @env = Env.new(nil)
-$ns.each { |k, v| @env.set(k, v) }
+Core::METHODS.each { |k, v| @env.set(k, v) }
 @env.set(:eval, ->(ast) { EVAL(ast, @env) })
 @env.set(:"*ARGV*", List.new(ARGV[1..] || []))
 
