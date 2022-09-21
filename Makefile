@@ -50,7 +50,7 @@ include Makefile.impls
 # General command line settings
 #
 
-MAL_IMPL = js
+MAL_IMPL = ruby
 
 # Path to loccount for counting LOC stats
 LOCCOUNT = loccount
@@ -122,7 +122,7 @@ STEP_TEST_FILES = $(strip $(wildcard \
 			$(filter-out $(if $(filter $(1),$(step5_EXCLUDES)),step5,),\
 			  $(regress_$(2)))\
 			,$(2)),\
-		      impls/$(1)/tests/$($(s))$(EXTENSION) impls/tests/$($(s))$(EXTENSION))))
+		      tests/$($(s))$(EXTENSION) tests/$($(s))$(EXTENSION))))
 
 # DOCKERIZE utility functions
 lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(subst G,g,$(subst H,h,$(subst I,i,$(subst J,j,$(subst K,k,$(subst L,l,$(subst M,m,$(subst N,n,$(subst O,o,$(subst P,p,$(subst Q,q,$(subst R,r,$(subst S,s,$(subst T,t,$(subst U,u,$(subst V,v,$(subst W,w,$(subst X,x,$(subst Y,y,$(subst Z,z,$1))))))))))))))))))))))))))
@@ -145,7 +145,7 @@ get_build_command = $(strip $(foreach mode,$(1)_MODE, \
       $(call impl_to_image,$(1)) \
       $(MAKE) $(if $(strip $($(mode))),$(mode)=$($(mode)),) \
       ,\
-      $(MAKE) $(if $(strip $($(mode))),$(mode)=$($(mode)),) -C impls/$(impl))))
+      $(MAKE) $(if $(strip $($(mode))),$(mode)=$($(mode)),) -C ruby)))
 
 # Takes impl and step args. Optional env vars and dockerize args
 # Returns a command prefix (docker command and environment variables)
@@ -169,7 +169,7 @@ get_run_prefix = $(strip $(foreach mode,$(call actual_impl,$(1))_MODE, \
 # Takes impl and step
 # Returns the runtest command prefix (with runtest options) for testing the given step
 get_runtest_cmd = $(call get_run_prefix,$(1),$(2),$(if $(filter cs fsharp mal tcl vb,$(1)),RAW=1,)) \
-		    ../../runtest.py $(opt_HARD) $(opt_DEFERRABLE) $(opt_OPTIONAL) $(call $(1)_TEST_OPTS) $(TEST_OPTS)
+		    ../runtest.py $(opt_HARD) $(opt_DEFERRABLE) $(opt_OPTIONAL) $(call $(1)_TEST_OPTS) $(TEST_OPTS)
 
 # Takes impl and step
 # Returns the runtest command prefix (with runtest options) for testing the given step
@@ -216,8 +216,8 @@ ALL_REPL = $(strip $(sort \
 $(foreach i,$(DO_IMPLS),$(foreach s,$(STEPS),$(call $(i)_STEP_TO_PROG,$(s)))):
 	$(foreach impl,$(word 2,$(subst /, ,$(@))),\
 	  $(if $(DOCKERIZE), \
-	    $(call get_build_command,$(impl)) $(patsubst impls/$(impl)/%,%,$(@)), \
-	    $(call get_build_command,$(impl)) $(subst impls/$(impl)/,,$(@))))
+	    $(call get_build_command,$(impl)) $(patsubst ruby/%,%,$(@)), \
+	    $(call get_build_command,$(impl)) $(subst ruby/,,$(@))))
 
 # Allow IMPL, build^IMPL, IMPL^STEP, and build^IMPL^STEP
 $(DO_IMPLS): $$(foreach s,$$(STEPS),$$(call $$(@)_STEP_TO_PROG,$$(s)))
@@ -238,7 +238,7 @@ $(ALL_TESTS): $$(call $$(word 2,$$(subst ^, ,$$(@)))_STEP_TO_PROG,$$(word 3,$$(s
 	@$(foreach impl,$(word 2,$(subst ^, ,$(@))),\
 	  $(foreach step,$(word 3,$(subst ^, ,$(@))),\
 	    echo "(call STEP_TEST_FILES,$(impl),$(step)): $(call STEP_TEST_FILES,$(impl),$(step))" && \
-	    cd impls/$(call actual_impl,$(impl)) && \
+	    cd ruby && \
 	    $(foreach test,$(patsubst impls/%,%,$(call STEP_TEST_FILES,$(impl),$(step))),\
 	      echo '----------------------------------------------' && \
 	      echo 'Testing $@; step file: $+, test file: $(test)' && \
@@ -271,7 +271,7 @@ $(DOCKER_BUILD):
 	@echo "----------------------------------------------"; \
 	$(foreach impl,$(word 2,$(subst ^, ,$(@))),\
 	  echo "Running: docker build -t $(call impl_to_image,$(impl)) .:"; \
-	  cd impls/$(impl) && docker build -t $(call impl_to_image,$(impl)) .)
+	  cd ruby && docker build -t $(call impl_to_image,$(impl)) .)
 
 #
 # Docker shell rules
@@ -293,7 +293,7 @@ perf: $(IMPL_PERF)
 $(IMPL_PERF):
 	@echo "----------------------------------------------"; \
 	$(foreach impl,$(word 2,$(subst ^, ,$(@))),\
-	  cd impls/$(call actual_impl,$(impl)); \
+	  cd ruby; \
 	  echo "Performance test for $(impl):"; \
 	  echo 'Running: $(call get_run_prefix,$(impl),stepA) ../$(impl)/run ../tests/perf1.mal'; \
 	  $(call get_run_prefix,$(impl),stepA) ../$(impl)/run ../tests/perf1.mal; \
@@ -310,7 +310,7 @@ $(IMPL_PERF):
 $(ALL_REPL): $$(call $$(word 2,$$(subst ^, ,$$(@)))_STEP_TO_PROG,$$(word 3,$$(subst ^, ,$$(@))))
 	@$(foreach impl,$(word 2,$(subst ^, ,$(@))),\
 	  $(foreach step,$(word 3,$(subst ^, ,$(@))),\
-	    cd impls/$(call actual_impl,$(impl)); \
+	    cd ruby; \
 	    echo 'REPL implementation $(impl), step file: $+'; \
 	    echo 'Running: $(call get_run_prefix,$(impl),$(step)) ../$(impl)/run $(RUN_ARGS)'; \
 	    $(call get_run_prefix,$(impl),$(step)) ../$(impl)/run $(RUN_ARGS);))
@@ -329,7 +329,7 @@ stats: $(IMPL_STATS)
 $(IMPL_STATS):
 	@$(foreach impl,$(word 2,$(subst ^, ,$(@))),\
 	  echo "Stats for $(impl):"; \
-	  $(LOCCOUNT) -x "[sS]tep[0-9]_.*|[.]md$$|tests|examples|Makefile|package.json|tsconfig.json|Cargo.toml|project.clj|node_modules|getline.cs|terminal.cs|elm-stuff|objpascal/regexpr|rdyncall|swift/templates" impls/$(impl))
+	  $(LOCCOUNT) -x "[sS]tep[0-9]_.*|[.]md$$|tests|examples|Makefile|package.json|tsconfig.json|Cargo.toml|project.clj|node_modules|getline.cs|terminal.cs|elm-stuff|objpascal/regexpr|rdyncall|swift/templates" ruby)
 
 #
 # Utility functions
