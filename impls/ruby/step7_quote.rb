@@ -6,7 +6,7 @@ require_relative 'env'
 require_relative 'core'
 
 @env = Env.new(nil)
-$ns.each { |k, v| @env.set(k, v) }
+Core::METHODS.each { |k, v| @env.set(k, v) }
 @env.set(:eval, ->(ast) { EVAL(ast, @env) })
 @env.set(:"*ARGV*", List.new(ARGV[1..] || []))
 
@@ -102,14 +102,8 @@ end
 def quasiquote(val)
   case val
   when List
-    if val[0] == :unquote && val.size == 2
-      val[1]
-    else
-      qq(val)
-    end
-  when Hash
-    List.new([:quote, val])
-  when Symbol
+    val[0] == :unquote && val.size == 2 ? val[1] : qq(val)
+  when Hash, Symbol
     List.new([:quote, val])
   when Vector
     List.new([:vec, qq(val)])

@@ -20,11 +20,9 @@ class Env
   end
 
   def find(key)
-    if @data.key?(key)
-      return self
-    elsif @outer
-      return @outer.find(key)
-    end
+    return self if @data.key?(key)
+
+    return @outer.find(key) if @outer
 
     nil
   end

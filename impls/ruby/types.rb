@@ -1,5 +1,6 @@
 class List < Array
   attr_accessor :meta
+
   def seq
     self
   end
@@ -12,6 +13,7 @@ end
 
 class Vector < Array
   attr_accessor :meta
+
   def seq
     List.new(self)
   end

@@ -17,20 +17,20 @@ class Reader
   end
 end
 
+def tokenize(string)
+  string.scan(REGEX).map { |e| e[0] }.select { |t| t != '' && t[0..0] != ';' }
+end
+
+def parse_str(token)
+  token[1..-2].gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'})
+end
+
 def read_str(string)
   tokens = tokenize(string)
   return nil if tokens.size.zero?
 
   reader = Reader.new(tokens)
   read_form(reader)
-end
-
-def tokenize(string)
-  string.scan(REGEX).map { |e| e[0] }.select { |t| t != '' && t[0..0] != ';' }
-end
-
-def parse_str(token)
-  return token[1..-2].gsub(/\\./, {"\\\\" => "\\", "\\n" => "\n", "\\\"" => '"'})
 end
 
 def read_form(reader)
@@ -73,6 +73,7 @@ def read_list(reader, klass, first, last)
   token = reader.next
 
   raise "Expected: #{first} got: #{token}" if token != first
+
   while (token = reader.peek) != last
     raise "expected ')', got EOF" unless token
 
@@ -86,14 +87,15 @@ end
 def read_atom(reader)
   token = reader.next
   case token
-  when /^-?[0-9]+$/ then       token.to_i
-  when /^-?[0-9][0-9.]*$/ then token.to_
+  when /^-?[0-9]+$/          then token.to_i
+  when /^-?[0-9][0-9.]*$/    then token.to_
   when /^"(?:\\.|[^\\"])*"$/ then parse_str(token)
-  when /^"/ then               raise "expected '\"', got EOF"
-  when /^:/ then               ':' + token[1..]
-  when 'nil' then              nil
-  when 'true' then             true
-  when 'false' then            false
-  else                         token.to_sym
+  when /^"/                  then raise "expected '\"', got EOF"
+  when /^:/                  then ':' + token[1..]
+  when 'nil'                 then nil
+  when 'true'                then true
+  when 'false'               then false
+  else
+    token.to_sym
   end
 end

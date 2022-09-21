@@ -6,7 +6,7 @@ require_relative 'env'
 require_relative 'core'
 
 @env = Env.new(nil)
-$ns.each { |k, v| @env.set(k, v) }
+Core::METHODS.each { |k, v| @env.set(k, v) }
 @env.set(:eval, ->(ast) { EVAL(ast, @env) })
 @env.set(:"*ARGV*", List.new(ARGV[1..] || []))
 
@@ -47,17 +47,15 @@ def EVAL(val, env)
       begin
         return EVAL(val[1], env)
       rescue Exception => e
-        if e.instance_of? MalException
-          e = e.data
-        else
-          e = e.message
-        end
+        e = if e.instance_of? MalException
+              e.data
+            else
+              e.message
+            end
 
-        if val[2] && val[2][0] == :"catch*"
-          return EVAL(val[2][2], Env.new(env, [val[2][1]], [e]))
-        else
-          raise e
-        end
+        return EVAL(val[2][2], Env.new(env, [val[2][1]], [e])) if val[2] && val[2][0] == :"catch*"
+
+        raise e
       end
     when :do
       val = eval_ast(List.new(val[1..]), env)[-1]

@@ -6,12 +6,25 @@ require_relative 'env'
 require_relative 'core'
 
 @env = Env.new(nil)
-$ns.each { |k, v| @env.set(k, v) }
+Core::METHODS.each { |k, v| @env.set(k, v) }
 @env.set(:eval, ->(ast) { EVAL(ast, @env) })
 @env.set(:"*ARGV*", List.new(ARGV[1..] || []))
 
 def READ(val)
   read_str(val)
+end
+
+def PRINT(val)
+  pr_str(val)
+end
+
+def rep(input)
+  PRINT(EVAL(READ(input), @env))
+end
+
+def prompt(*args)
+  print(*args)
+  gets
 end
 
 def EVAL(val, env)
@@ -47,22 +60,20 @@ def EVAL(val, env)
       begin
         return EVAL(val[1], env)
       rescue Exception => e
-        if e.instance_of? MalException
-          e = e.data
-        else
-          e = e.message
-        end
+        e = if e.instance_of? MalException
+              e.data
+            else
+              e.message
+            end
 
-        if val[2] && val[2][0] == :"catch*"
-          return EVAL(val[2][2], Env.new(env, [val[2][1]], [e]))
-        else
-          raise e
-        end
+        return EVAL(val[2][2], Env.new(env, [val[2][1]], [e])) if val[2] && val[2][0] == :"catch*"
+
+        raise e
       end
     when :do
       val = eval_ast(List.new(val[1..]), env)[-1]
     when :if
-      EVAL(val[1], env) ? val = val[2] : val = val[3]
+      val = EVAL(val[1], env) ? val[2] : val[3]
     when :"fn*"
       return Function.new(val[2], val[1], env) do |*args|
         new_env = Env.new(env, val[1], List.new(args))
@@ -77,23 +88,6 @@ def EVAL(val, env)
       env = Env.new(f.env, f.params, ev.drop(1))
     end
   end
-end
-
-def PRINT(val)
-  pr_str(val)
-end
-
-def rep(input)
-  PRINT(EVAL(READ(input), @env))
-end
-
-def not_rep(input)
-  EVAL(READ(input), @env)
-end
-
-def prompt(*args)
-  print(*args)
-  gets
 end
 
 def eval_ast(ast, env)
@@ -114,26 +108,20 @@ end
 def qq(val)
   list = List.new
   val.reverse_each do |elt|
-    if elt.instance_of?(List) && elt[0] == :"splice-unquote"
-      list = List.new([:concat, elt[1], list])
-    else
-      list = List.new([:cons, quasiquote(elt), list])
-    end
+    list = if elt.instance_of?(List) && elt[0] == :"splice-unquote"
+             List.new([:concat, elt[1], list])
+           else
+             List.new([:cons, quasiquote(elt), list])
+           end
   end
-  return list
+  list
 end
 
 def quasiquote(val)
   case val
   when List
-    if val[0] == :unquote && val.size == 2
-      val[1]
-    else
-      qq(val)
-    end
-  when Hash
-    List.new([:quote, val])
-  when Symbol
+    val[0] == :unquote && val.size == 2 ? val[1] : qq(val)
+  when Hash, Symbol
     List.new([:quote, val])
   when Vector
     List.new([:vec, qq(val)])
@@ -142,7 +130,7 @@ def quasiquote(val)
   end
 end
 
-def is_macro_call(ast, env)
+def macro_call?(ast, env)
   ast.instance_of?(List) &&
     ast[0].is_a?(Symbol) &&
     env.find(ast[0]) &&
@@ -151,11 +139,11 @@ def is_macro_call(ast, env)
 end
 
 def macroexpand(ast, env)
-  while is_macro_call(ast, env)
+  while macro_call?(ast, env)
     f = env.get(ast[0])
     ast = f.call(*ast[1..])
   end
-  return ast
+  ast
 end
 
 rep("(def! *host-language* \"Ruby\")")
